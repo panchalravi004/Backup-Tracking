@@ -17,10 +17,4 @@
         }
 
     }
-
-    $db = new DBConnect();
-    if($db->connect()){
-        echo 'connected';
-    }else{
-        echo 'Faild to connect';
-    }
+    
