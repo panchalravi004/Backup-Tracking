@@ -61,13 +61,14 @@ class UserController{
     }
 
 
-    public function getUserList(){
+    public function getUserList($parentId){
 
         try {
     
-            $query = "SELECT * FROM `USER` ";
+            $query = "SELECT * FROM `USER` WHERE Parent = ? ";
+
             $statement = $this->conn->prepare($query);
-            
+            $statement->bind_param("i",$parentId);
             $statement->execute();
             // echo $statement->num_rows();
             $result = $statement->get_result();
@@ -260,4 +261,4 @@ class UserController{
 }
 
 // $u = new UserController();
-// echo $u->getUserList();
+// echo $u->getUserList(0);
