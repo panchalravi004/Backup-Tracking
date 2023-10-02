@@ -16,7 +16,7 @@ class Logger{
         $date = $date->format("y:m:d h:i:s");
 
         $status = str_pad($status,10," ");
-        $errorPath = str_pad($this->className."::".$functionName,45," ");
+        $errorPath = str_pad($this->className,20," ")."::".str_pad($functionName,20," ");
 
         $errorMsg = $date." ".$status." ".$errorPath." -::- ".$msg."\n";
 
