@@ -2,10 +2,10 @@
 
 include_once dirname(dirname(__FILE__)) .'../Utilities/DBConnection.php';
 include_once dirname(dirname(__FILE__)) .'/Controllers/Response.php';
-include_once dirname(dirname(__FILE__)) .'/Models/User.php';
+include_once dirname(dirname(__FILE__)) .'/Models/Role.php';
 include_once dirname(dirname(__FILE__)) .'/Logs/Logger.php';
 
-class UserController{
+class RoleController{
 
     private $conn;
     private $logger;
@@ -15,13 +15,13 @@ class UserController{
         $db = new DBConnect();
         $this->conn = $db->connect();
         
-        $this->logger = new Logger('UserController');
+        $this->logger = new Logger('RoleController');
 
         date_default_timezone_set("Asia/Kolkata");
     }
 
 
-    public function createUser($user){
+    public function createRole($role, $user){
 
         try {
         
@@ -29,10 +29,10 @@ class UserController{
             $date = new DateTime();
             $date = $date->format("y:m:d h:i:s");
     
-            $query = "INSERT INTO `USER` (FirstName, LastName, Email, Role, Parent, Permissions, Password, CreatedDate, ModifiedDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            $query = "INSERT INTO `ROLE` (Name, User, CreatedDate, ModifiedDate, CreatedBy, ModifiedBy) VALUES (?, ?, ?, ?, ?, ?)";
             
             $statement = $this->conn->prepare($query);
-            $statement->bind_param("sssiiisss", $user->FirstName, $user->LastName, $user->Email, $user->Role, $user->Parent, $user->Permissions, $user->Password, $date, $date);
+            $statement->bind_param("sissii", $role->Name, $role->User, $date, $date, $user, $user);
             
             if($statement->execute()){
                 
@@ -44,7 +44,7 @@ class UserController{
 
                 $res = new Response('Error','Failed to insert record');
 
-                $this->logger->msg('createUser','Error','Failed to insert record');
+                $this->logger->msg('createRole','Error','Failed to insert record');
 
                 return json_encode($res);
             }
@@ -54,7 +54,7 @@ class UserController{
 
             $res = new Response('Error',$e->getMessage());
 
-            $this->logger->msg('createUser','Error',$e->getMessage());
+            $this->logger->msg('createRole','Error',$e->getMessage());
 
             return json_encode($res);
         }
@@ -62,14 +62,14 @@ class UserController{
     }
 
 
-    public function getUserList($parentId){
+    public function getRoleList($userId){
 
         try {
     
-            $query = "SELECT * FROM `USER` WHERE Parent = ? ";
+            $query = "SELECT * FROM `ROLE` WHERE User = ? ";
 
             $statement = $this->conn->prepare($query);
-            $statement->bind_param("i",$parentId);
+            $statement->bind_param("i",$userId);
             $statement->execute();
             // echo $statement->num_rows();
             $result = $statement->get_result();
@@ -79,14 +79,14 @@ class UserController{
 
                 $res = new Response('Success','Record Fetch Successfully !', $row);
 
-                $this->logger->msg('getUserList','Success','Record Fetch Successfully !');
+                $this->logger->msg('getRoleList','Success','Record Fetch Successfully !');
                 
                 return json_encode($res);
             }else{
                 
                 $res = new Response('Warning','No Record Found !', $row);
 
-                $this->logger->msg('getUserList','Warning','No Record Found !');
+                $this->logger->msg('getRoleList','Warning','No Record Found !');
 
                 return json_encode($res);
             }
@@ -96,7 +96,7 @@ class UserController{
 
             $res = new Response('Error',$e->getMessage());
 
-            $this->logger->msg('getUserList','Error',$e->getMessage());
+            $this->logger->msg('getRoleList','Error',$e->getMessage());
 
             return json_encode($res);
             
@@ -104,11 +104,11 @@ class UserController{
         
     }
 
-    public function getUserById($Id){
+    public function getRoleById($Id){
 
         try {
     
-            $query = "SELECT * FROM `USER` WHERE Id = ? ";
+            $query = "SELECT * FROM `ROLE` WHERE Id = ? ";
 
             $statement = $this->conn->prepare($query);
             $statement->bind_param("i",$Id);
@@ -135,7 +135,7 @@ class UserController{
 
             $res = new Response('Error',$e->getMessage());
 
-            $this->logger->msg('getUserById','Error',$e->getMessage());
+            $this->logger->msg('getRoleById','Error',$e->getMessage());
 
             return json_encode($res);
             
@@ -143,65 +143,18 @@ class UserController{
 
     }
     
-    public function authenticateUser($email, $pass){
-
-        try {
-    
-            $query = "SELECT Id, Email, Password FROM `USER` WHERE Email = ? ";
-
-            $statement = $this->conn->prepare($query);
-            $statement->bind_param("s",$email);
-            
-            $statement->execute();
-
-            $result = $statement->get_result();
-            $row = $result->fetch_array(MYSQLI_ASSOC);
-
-            if($row){
-
-                if($row['Password'] == $pass){
-
-                    $res = new Response('Success','Authentication Successfully !', $row);
-                    return json_encode($res);
-
-                }else{
-
-                    $res = new Response('Warning','Please Enter Valid Password !');
-                    return json_encode($res);
-                }
-
-
-            }else{
-                
-                $res = new Response('Warning','Please Enter Valid Email Address !');
-                return json_encode($res);
-            }
-
-
-        } catch (Exception $e) {
-
-            $res = new Response('Error',$e->getMessage());
-
-            $this->logger->msg('authenticateUser','Error',$e->getMessage());
-
-            return json_encode($res);
-            
-        }
-
-    }
-    
-    public function updateUser($user){
+    public function updateRole($role, $user){
 
         try {
 
             $date = new DateTime();
             $date = $date->format("y:m:d h:i:s");
     
-            $query = "UPDATE `USER` SET FirstName= ?, LastName= ?, Email= ?, Role= ?, Parent= ?, Permissions= ?, Password= ?, ModifiedDate = ? WHERE Id= ?";
+            $query = "UPDATE `ROLE` SET Name= ?, User= ?, ModifiedDate = ?, ModifiedBy = ? WHERE Id= ?";
 
             $statement = $this->conn->prepare($query);
 
-            $statement->bind_param("sssiiissi",$user->FirstName, $user->LastName, $user->Email, $user->Role, $user->Parent, $user->Permissions, $user->Password, $date, $user->Id);
+            $statement->bind_param("sisii",$role->Name, $role->User, $date, $user, $role->Id);
             
             if($statement->execute()){
 
@@ -220,7 +173,7 @@ class UserController{
 
             $res = new Response('Error',$e->getMessage());
 
-            $this->logger->msg('updateUser','Error',$e->getMessage());
+            $this->logger->msg('updateRole','Error',$e->getMessage());
 
             return json_encode($res);
             
@@ -228,11 +181,11 @@ class UserController{
 
     }
     
-    public function deleteUser($Id){
+    public function deleteRole($Id){
 
         try {
 
-            $query = "DELETE FROM `USER` WHERE Id= ?";
+            $query = "DELETE FROM `ROLE` WHERE Id= ?";
 
             $statement = $this->conn->prepare($query);
 
@@ -255,7 +208,7 @@ class UserController{
 
             $res = new Response('Error',$e->getMessage());
 
-            $this->logger->msg('deleteUser','Error',$e->getMessage());
+            $this->logger->msg('deleteRole','Error',$e->getMessage());
 
             return json_encode($res);
             
@@ -264,5 +217,6 @@ class UserController{
 
 }
 
-// $u = new UserController();
-// echo $u->getUserList(0);
+
+// $u = new RoleController();
+// echo $u->getRoleById(4);

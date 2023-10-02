@@ -4,3 +4,9 @@
 23:09:29 03:51:48 Success    UserController::createUser                    -::- Successfully to insert record
 23:09:29 03:51:48 Success    UserController::createUser                    -::- Successfully to insert record
 23:09:29 03:51:48 Success    UserController::createUser                    -::- Successfully to insert record
+23:09:29 04:02:50 Success    UserController::createUser                    -::- Successfully to insert record
+23:10:02 11:50:55 Error      RoleController::createRole                    -::- Unknown column 'CreatedDate' in 'field list'
+23:10:02 12:14:32 Success    RoleController::getRoleList                   -::- Record Fetch Successfully !
+23:10:02 12:14:46 Success    RoleController::getRoleList                   -::- Record Fetch Successfully !
+23:10:02 12:15:26 Success    RoleController::getRoleList                   -::- Record Fetch Successfully !
+23:10:02 12:15:41 Success    RoleController::getRoleList                   -::- Record Fetch Successfully !
