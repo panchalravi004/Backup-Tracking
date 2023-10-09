@@ -65,12 +65,58 @@ class AuthController{
 
     }
 
-    public static function doLogout(){}
+    public static function doLogout(){
 
-    public static function createSession(){}
+        AuthController::deleteSession();
 
-    public static function deleteSession(){}
+    }
 
-    public static function getCurrentSession(){}
+    public static function createSession($var, $val){
+    
+        if(session_status() == PHP_SESSION_ACTIVE){
+
+            $_SESSION[$var] = $val;
+
+            $res = new Response('Success','Session Created Successfully !', $_SESSION[$var]);
+            return json_encode($res);
+            
+        }else{
+            
+            $res = new Response('Warning','No Session Started !');
+            return json_encode($res);
+
+        }        
+
+    }
+
+    public static function deleteSession(){
+
+        session_unset();
+        session_destroy();
+
+    }
+
+    public static function getSession($var){
+        if(session_status() == PHP_SESSION_ACTIVE){
+
+            if(isset($_SESSION[$var])){
+
+                $res = new Response('Success','Session Get Successfully !', $_SESSION[$var]);
+                return json_encode($res);
+                
+            }else{
+                $res = new Response('Warning','No '.$var.' Found In Session !', $_SESSION[$var]);
+                return json_encode($res);
+                
+            }
+        }else{
+            
+            $res = new Response('Warning','No Session Started !');
+            return json_encode($res);
+        }
+
+        
+
+    }
 
 }
