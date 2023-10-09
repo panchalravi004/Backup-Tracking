@@ -2,17 +2,14 @@
 
     class DBConnect{
 
-        private $conn;
-
-        public function __construct(){}
-
-        public function connect(){
+        public static function connect(){
+            $conn = null; 
 
             include_once dirname(__FILE__).'/DBConstants.php';
 
-            $this->conn = new MySQLi(DB_HOST,DB_USERNAME, DB_PASSWORD, DB_NAME);
+            $conn = new MySQLi(DB_HOST,DB_USERNAME, DB_PASSWORD, DB_NAME);
 
-            return $this->conn;
+            return $conn;
 
         }
 

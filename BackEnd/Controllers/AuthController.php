@@ -1,5 +1,5 @@
 <?php
-include_once dirname(dirname(__FILE__)) .'../Utilities/DBConnection.php';
+
 include_once dirname(dirname(__FILE__)) .'/Controllers/Response.php';
 include_once dirname(dirname(__FILE__)) .'/Models/User.php';
 include_once dirname(dirname(__FILE__)) .'/Logs/Logger.php';
@@ -9,10 +9,9 @@ class AuthController{
     private $conn;
     private $logger;
 
-    public function __construct() {
-        
-        $db = new DBConnect();
-        $this->conn = $db->connect();
+    public function __construct($conn) {
+
+        $this->conn = $conn;
         
         $this->logger = new Logger('AuthController');
 

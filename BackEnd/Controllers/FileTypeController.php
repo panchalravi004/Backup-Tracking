@@ -1,6 +1,5 @@
 <?php
 
-include_once dirname(dirname(__FILE__)) .'../Utilities/DBConnection.php';
 include_once dirname(dirname(__FILE__)) .'/Controllers/Response.php';
 include_once dirname(dirname(__FILE__)) .'/Models/FileType.php';
 include_once dirname(dirname(__FILE__)) .'/Logs/Logger.php';
@@ -10,10 +9,9 @@ class FileTypeController{
     private $conn;
     private $logger;
 
-    public function __construct() {
+    public function __construct($conn) {
         
-        $db = new DBConnect();
-        $this->conn = $db->connect();
+        $this->conn = $conn;
         
         $this->logger = new Logger('FileTypeController');
 
