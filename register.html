@@ -20,9 +20,50 @@
     <!-- Custom styles for this template-->
     <link href="css/sb-admin-2.min.css" rel="stylesheet">
 
+    <style>
+
+        .input-feedback{
+            display: none;
+            font-size: 12px;
+            color: #ff7c7c;
+            margin: 5px 15px;
+        }
+
+        .alert-section{
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            z-index: 1000;
+            width: 100%;
+            top: 3%;
+        }
+        .alert{
+            width: 45%;
+        }
+
+    </style>
+
 </head>
 
 <body class="bg-gradient-primary">
+
+    <!-- Spinner -->
+    <div class="spinner" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+
+    <!-- Alert -->
+    <div class="alert-section">
+        <div class="alert alert-success alert-dismissible fade hide" role="alert">
+            <span class="alert-message"></span>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    </div>
+
 
     <div class="container">
 
@@ -36,34 +77,38 @@
                             <div class="text-center">
                                 <h1 class="h4 text-gray-900 mb-4">Create an Account!</h1>
                             </div>
-                            <form class="user">
+                            <form class="user" onsubmit="return false;">
                                 <div class="form-group row">
                                     <div class="col-sm-6 mb-3 mb-sm-0">
-                                        <input type="text" class="form-control form-control-user" id="exampleFirstName"
+                                        <input type="text" class="form-control form-control-user" name="FirstName" id="exampleFirstName"
                                             placeholder="First Name">
+                                        <span class="input-feedback FirstName-feedback"></span>
                                     </div>
                                     <div class="col-sm-6">
-                                        <input type="text" class="form-control form-control-user" id="exampleLastName"
+                                        <input type="text" class="form-control form-control-user" name="LastName" id="exampleLastName"
                                             placeholder="Last Name">
+                                        <span class="input-feedback LastName-feedback"></span>
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <input type="email" class="form-control form-control-user" id="exampleInputEmail"
+                                    <input type="email" class="form-control form-control-user" name="Email" id="exampleInputEmail"
                                         placeholder="Email Address">
+                                    <span class="input-feedback Email-feedback"></span>
                                 </div>
                                 <div class="form-group row">
-                                    <div class="col-sm-6 mb-3 mb-sm-0">
-                                        <input type="password" class="form-control form-control-user"
+                                    <div class="col-sm-6 mb-3 mb-sm-0"> 
+                                        <input type="password" class="form-control form-control-user" name="Password"
                                             id="exampleInputPassword" placeholder="Password">
+                                        <span class="input-feedback Password-feedback"></span>
                                     </div>
                                     <div class="col-sm-6">
                                         <input type="password" class="form-control form-control-user"
-                                            id="exampleRepeatPassword" placeholder="Repeat Password">
+                                            id="exampleRepeatPassword" name="RepeatPassword" placeholder="Repeat Password">
+                                        <span class="input-feedback RepeatPassword-feedback"></span>
                                     </div>
                                 </div>
-                                <a href="login.html" class="btn btn-primary btn-user btn-block">
-                                    Register Account
-                                </a>
+                                <button type="submit" class="btn btn-primary btn-user btn-block" onclick="registerUser()">Register Account</button>
+
                                 <hr>
                             </form>
                             <hr>
@@ -92,5 +137,135 @@
     <script src="js/sb-admin-2.min.js"></script>
 
 </body>
+
+<script>
+
+    function registerUser(e){
+
+        if(valdateForm()){
+
+            toggleSpinner();
+    
+            var formdata = new FormData();
+            formdata.append("FirstName", getInput("FirstName").value);
+            formdata.append("LastName", getInput("LastName").value);
+            formdata.append("Email", getInput("Email").value);
+            formdata.append("Password", getInput("Password").value);
+            formdata.append("Role", "null");
+            formdata.append("Parent", "null");
+            formdata.append("Permissions", "null");
+    
+            var requestOptions = {
+                method: 'POST',
+                body: formdata,
+                redirect: 'follow'
+            };
+    
+            fetch("/Backup-Tracking/BackEnd/v1/registerUser.php", requestOptions)
+            .then(response => response.text())
+            .then((result) => {
+                result = JSON.parse(result);
+                console.log('result',result);
+
+                showAlert(result['status'], result['message']);
+    
+                clearForm();
+                toggleSpinner();
+            })
+            .catch((error) => {
+                
+                console.log('error', error);
+                toggleSpinner();
+            });
+        }
+
+    }
+
+    function showAlert(status, message){
+        let alert = document.querySelector('.alert');
+        let msg = alert.querySelector('.alert-message');
+        msg.innerHTML = message;
+        alert.classList.add('show');
+        alert.classList.remove('hide');
+
+        let newClassList = alert.className.split(' ')
+        .filter((cls)=>{
+            return !cls.includes('alert-');
+        });
+
+        alert.className = newClassList.join(' ');
+        alert.classList.add(`alert-${status.toLowerCase()}`);
+
+        setTimeout(()=>{
+            alert.classList.remove('show');
+            alert.classList.add('hide');
+        },3000);
+    }
+
+
+    function valdateForm(){
+
+        clearInputFeedBack();
+
+        let isValidate = true;
+        let inputs = ["FirstName","LastName","Email","Password", "RepeatPassword"];
+        inputs.forEach(ele =>{
+
+            var a = getInput(ele);
+            if(!a.value){
+                var b = getInputFeedBack(ele);
+                b.innerHTML = 'Please Enter Value !';
+                b.style.display = 'block';
+                isValidate = false;
+            }
+        });
+        
+        if(getInput("Password").value != getInput("RepeatPassword").value){
+            var b = getInputFeedBack("RepeatPassword");
+            b.innerHTML = 'Please Enter Valid Password !';
+            b.style.display = 'block';
+            isValidate = false;
+        }
+
+        return isValidate;
+    }
+
+    function clearForm(){
+
+        let inputs = ["FirstName","LastName","Email","Password", "RepeatPassword"];
+        inputs.forEach(ele =>{
+            var a = getInput(ele);
+            a.value = '';
+        })
+
+    }
+    function clearInputFeedBack(){
+        let inputs = document.querySelectorAll('.input-feedback');
+        inputs.forEach(ele =>{
+            ele.innerHTML = '';
+            ele.style.display = 'none';
+        })
+    }
+
+    function getInput(name){
+        return document.querySelector('input[name="'+name+'"]');
+    }
+
+    function getInputFeedBack(name){
+        return document.querySelector('.'+name+'-feedback');
+    }
+
+    function toggleSpinner(){
+        let a = document.querySelector('.spinner');
+        if(a.style.display == 'flex'){
+            a.style.display = 'none';
+        }else{
+            a.style.display = 'flex';
+        }
+    }
+    
+
+</script>
+
 
 </html>

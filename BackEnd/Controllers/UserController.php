@@ -34,7 +34,7 @@ class UserController{
             
             if($statement->execute()){
                 
-                $res = new Response('Success','Record Inserted successfully');
+                $res = new Response('Success','Register User Successfully !');
 
                 return json_encode($res);
                 
