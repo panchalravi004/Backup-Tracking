@@ -20,9 +20,34 @@
     <!-- Custom styles for this template-->
     <link href="css/sb-admin-2.min.css" rel="stylesheet">
 
+    <style>
+        
+        .alert{
+            width: 45%;
+        }
+
+    </style>
+
 </head>
 
 <body class="bg-gradient-primary">
+
+    <!-- Spinner -->
+    <div class="spinner" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+
+    <!-- Alert -->
+    <div class="alert-section">
+        <div class="alert alert-success alert-dismissible fade hide" role="alert">
+            <span class="alert-message"></span>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    </div>
 
     <div class="container">
 
@@ -41,15 +66,19 @@
                                     <div class="text-center">
                                         <h1 class="h4 text-gray-900 mb-4">Welcome Back!</h1>
                                     </div>
-                                    <form class="user">
+                                    <form class="user" onsubmit="return false;">
                                         <div class="form-group">
                                             <input type="email" class="form-control form-control-user"
+                                                name="Email"
                                                 id="exampleInputEmail" aria-describedby="emailHelp"
                                                 placeholder="Enter Email Address...">
+                                            <span class="input-feedback Email-feedback"></span>
                                         </div>
                                         <div class="form-group">
                                             <input type="password" class="form-control form-control-user"
+                                                name="Password"
                                                 id="exampleInputPassword" placeholder="Password">
+                                            <span class="input-feedback Password-feedback"></span>
                                         </div>
                                         <div class="form-group">
                                             <div class="custom-control custom-checkbox small">
@@ -58,9 +87,9 @@
                                                     Me</label>
                                             </div>
                                         </div>
-                                        <a href="index.html" class="btn btn-primary btn-user btn-block">
+                                        <button class="btn btn-primary btn-user btn-block" onclick="authenticateUser()">
                                             Login
-                                        </a>
+                                        </button>
                                         <hr>
                                     </form>
                                     <hr>
@@ -93,5 +122,122 @@
     <script src="js/sb-admin-2.min.js"></script>
 
 </body>
+
+<script>
+
+    function authenticateUser(e){
+
+        if(valdateForm()){
+
+            toggleSpinner();
+    
+            var formdata = new FormData();
+            formdata.append("Email", getInput("Email").value);
+            formdata.append("Password", getInput("Password").value);
+    
+            var requestOptions = {
+                method: 'POST',
+                body: formdata,
+                redirect: 'follow'
+            };
+    
+            fetch("/Backup-Tracking/BackEnd/v1/authenticate.php", requestOptions)
+            .then(response => response.text())
+            .then((result) => {
+                result = JSON.parse(result);
+                console.log('result',result);
+
+                showAlert(result['status'], result['message']);
+    
+                clearForm();
+                toggleSpinner();
+            })
+            .catch((error) => {
+                
+                console.log('error', error);
+                toggleSpinner();
+            });
+        }
+
+    }
+
+    function showAlert(status, message){
+        let alert = document.querySelector('.alert');
+        let msg = alert.querySelector('.alert-message');
+        msg.innerHTML = message;
+        alert.classList.add('show');
+        alert.classList.remove('hide');
+
+        let newClassList = alert.className.split(' ')
+        .filter((cls)=>{
+            return !cls.includes('alert-');
+        });
+
+        alert.className = newClassList.join(' ');
+        alert.classList.add(`alert-${status.toLowerCase()}`);
+
+        setTimeout(()=>{
+            alert.classList.remove('show');
+            alert.classList.add('hide');
+        },3000);
+    }
+
+
+    function valdateForm(){
+
+        clearInputFeedBack();
+
+        let isValidate = true;
+        let inputs = ["Email","Password"];
+        inputs.forEach(ele =>{
+
+            var a = getInput(ele);
+            if(!a.value){
+                var b = getInputFeedBack(ele);
+                b.innerHTML = 'Please Enter Value !';
+                b.style.display = 'block';
+                isValidate = false;
+            }
+        });
+
+        return isValidate;
+    }
+
+    function clearForm(){
+
+        let inputs = ["Email","Password"];
+        inputs.forEach(ele =>{
+            var a = getInput(ele);
+            a.value = '';
+        })
+
+    }
+    function clearInputFeedBack(){
+        let inputs = document.querySelectorAll('.input-feedback');
+        inputs.forEach(ele =>{
+            ele.innerHTML = '';
+            ele.style.display = 'none';
+        })
+    }
+
+    function getInput(name){
+        return document.querySelector('input[name="'+name+'"]');
+    }
+
+    function getInputFeedBack(name){
+        return document.querySelector('.'+name+'-feedback');
+    }
+
+    function toggleSpinner(){
+        let a = document.querySelector('.spinner');
+        if(a.style.display == 'flex'){
+            a.style.display = 'none';
+        }else{
+            a.style.display = 'flex';
+        }
+    }
+    
+
+</script>
 
 </html>
